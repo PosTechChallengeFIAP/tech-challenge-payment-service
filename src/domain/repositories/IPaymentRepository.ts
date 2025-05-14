@@ -7,5 +7,5 @@ export interface IPaymentRepository {
     findById(id: string): Promise<IPayment | null>
     findByOrderId(orderId: number): Promise<IPayment[]>
     create(payment: IPaymentToCreate): Promise<IPayment>
-    update(paymentId: string, status: EPaymentStatus): Promise<IPayment>
+    update(payment: IPayment): Promise<IPayment>
 }

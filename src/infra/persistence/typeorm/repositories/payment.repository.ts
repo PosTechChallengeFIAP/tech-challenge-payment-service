@@ -31,10 +31,7 @@ export class PaymentEntityRepository implements IPaymentRepository {
         return await this.repository.save(payment);
     }
 
-    async update(paymentId: string, status: EPaymentStatus): Promise<IPayment> {
-        return await this.repository.save({
-            id: paymentId,
-            status
-        });
+    async update(payment: IPayment): Promise<IPayment> {
+        return await this.repository.save(payment);
     }
 }
