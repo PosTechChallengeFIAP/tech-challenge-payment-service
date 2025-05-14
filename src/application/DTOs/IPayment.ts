@@ -5,4 +5,6 @@ export interface IPayment {
     value: number
     status: EPaymentStatus
     orderId: number
+    createdAt: Date
+    updatedAt: Date
 }

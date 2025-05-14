@@ -6,12 +6,16 @@ export class Payment implements IPayment {
     value: number
     status: EPaymentStatus
     orderId: number
+    createdAt: Date
+    updatedAt: Date
 
-    constructor(id: string, value: number, status: EPaymentStatus, orderId: number) {
+    constructor(id: string, value: number, status: EPaymentStatus, orderId: number, createdAt: Date = new Date(), updatedAt: Date = new Date()) {
         this.id = id
         this.value = value
         this.status = status
         this.orderId = orderId
+        this.createdAt = createdAt
+        this.updatedAt = updatedAt
     }
 
     public setStatus(status: EPaymentStatus): void {
