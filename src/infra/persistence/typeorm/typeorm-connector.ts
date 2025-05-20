@@ -2,6 +2,11 @@ import { DataSource as TypeOrmDataSource } from 'typeorm';
 import { typeOrmConnection } from './typeorm-connection';
 import { Logger } from '@infra/utils/logger/Logger';
 import { IDataBaseConnector } from '../IDataBaseConnector';
+import { exec } from 'child_process';
+import util from 'util';
+import { envPostgres } from '@config/variables/postgres';
+
+const execAsync = util.promisify(exec);
 
 export class TypeOrmConnector implements IDataBaseConnector{
   private static instance: TypeOrmConnector;
@@ -20,15 +25,20 @@ export class TypeOrmConnector implements IDataBaseConnector{
 
   public async connect(): Promise<boolean> {
     await this.typeOrmConnection.initialize()
-        .then(() => {
+        .then(async () => {
             Logger.info({
-                        message: '[DATABASE] - Connected'
-                    })
+              message: '[DATABASE] - Connected'
+            })
+
+            await this.typeOrmConnection.query(`CREATE SCHEMA IF NOT EXISTS "${envPostgres.schema}"`);
+
+            const { stdout, stderr } = await execAsync('yarn db:run');
+            Logger.info({ message: '[MIGRATION] - Output', additionalInfo: { stdout, stderr } });
         })
         .catch((error) => {
             Logger.error({
                 message: '[DATABASE] - Connection failed',
-                additionalInfo: { errorMessage: error.message }
+                additionalInfo: { errorMessage: error.message, errorStack: error.stack, error: error }
             })
         });
     return this.typeOrmConnection.isInitialized;
