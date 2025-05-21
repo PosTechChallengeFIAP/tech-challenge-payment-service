@@ -1,5 +1,5 @@
 resource "aws_apigatewayv2_api" "ecs_api" {
-  name          = "tech-challenge-payment-service"
+  name          = "tc-payment-service"
   protocol_type = "HTTP"
 
   cors_configuration {
@@ -43,5 +43,5 @@ resource "aws_apigatewayv2_stage" "ecs_stage" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_api_log_group" {
-  name = "/aws/apigateway/tech-challenge-payment-service"
+  name = "/aws/apigateway/tc-payment-service"
 }

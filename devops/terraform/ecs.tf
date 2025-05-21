@@ -1,9 +1,9 @@
 resource "aws_ecs_cluster" "ecs_cluster" {
-  name = "tech-challenge-payment-service"
+  name = "tc-payment-service"
 }
 
 resource "aws_ecs_service" "app_service" {
-  name                    = "tech-challenge-payment-service"
+  name                    = "tc-payment-service"
   cluster                 = aws_ecs_cluster.ecs_cluster.id
   task_definition         = aws_ecs_task_definition.app_task.arn
   desired_count           = 2
@@ -12,13 +12,13 @@ resource "aws_ecs_service" "app_service" {
 
   network_configuration {
     subnets          = [aws_subnet.private.id]
-    security_groups  = [data.terraform_remote_state.network.outputs.payment_api_sg_id]
+    security_groups  = [data.terraform_remote_state.network.outputs.main_sg_id]
     assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_target_group.arn
-    container_name   = "tech-challenge-payment-service"
+    container_name   = "tc-payment-service"
     container_port   = 3000
   }
 
@@ -29,54 +29,15 @@ resource "aws_ecs_service" "app_service" {
   depends_on = [aws_db_instance.postgres, aws_instance.ecs_instance]
 }
 
-# resource "aws_ecs_service" "app_debug" {
-#   name                    = "tech-challenge-test"
-#   cluster                 = aws_ecs_cluster.ecs_cluster.id
-#   task_definition         = aws_ecs_task_definition.debug_task.arn
-#   desired_count           = 1
-#   launch_type             = "EC2"
-#   force_new_deployment    = true
-#   enable_execute_command  = true
-
-#   network_configuration {
-#     subnets          = [aws_subnet.private.id]
-#     security_groups  = [data.terraform_remote_state.network.outputs.payment_api_sg_id]
-#     assign_public_ip = false
-#   }
-
-#   deployment_controller {
-#     type = "ECS"
-#   }
-
-#   depends_on = [aws_db_instance.postgres, aws_instance.ecs_instance]
-# }
-
-# resource "aws_ecs_task_definition" "debug_task" {
-#   family                   = "debug"
-#   network_mode             = "awsvpc"
-#   requires_compatibilities = ["EC2"]
-#   task_role_arn = data.aws_iam_role.lab_role.arn
-
-#   container_definitions = jsonencode([{
-#     name      = "debug_psql"
-#     image     = "postgres"
-#     cpu    = 512
-#     memory = 1024
-#     essential = true
-#     command   = ["sleep", "3600"]
-#   }])
-# }
-
-
 resource "aws_ecs_task_definition" "app_task" {
-  family                   = "tech-challenge-payment-service"
+  family                   = "tc-payment-service"
   network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
 
   container_definitions = jsonencode([
     {
-      name      = "tech-challenge-payment-service"
-      image     = "loadinggreg/tech-challenge-payment-service:${var.tc_image_tag}"
+      name      = "tc-payment-service"
+      image     = "loadinggreg/tc-payment-service:${var.tc_image_tag}"
       cpu       = 256
       memory    = 512
       essential = true
@@ -100,7 +61,7 @@ resource "aws_ecs_task_definition" "app_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/tech-challenge-payment-service"
+          "awslogs-group"         = "/ecs/tc-payment-service"
           "awslogs-region"        = "us-west-2"
           "awslogs-stream-prefix" = "app-ecs"
         }
@@ -146,6 +107,14 @@ resource "aws_ecs_task_definition" "app_task" {
         {
           name  = "AWS_SESSION_TOKEN"
           value = var.aws_session_token
+        },
+        {
+          name  = "ENVIRONMENT"
+          value = "production"
+        },
+        {
+          name = "HOST"
+          value = "0.0.0.0"
         }
       ]
     }
@@ -153,5 +122,5 @@ resource "aws_ecs_task_definition" "app_task" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
-  name = "/ecs/tech-challenge-payment-service"
+  name = "/ecs/tc-payment-service"
 }

@@ -1,7 +1,7 @@
 data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
-    bucket = "tech-challenge-tf-state-bucket-m7ppr"
+    bucket = var.aws_bucket_name
     key    = "network/terraform.tfstate"
     region = "us-west-2"
   }

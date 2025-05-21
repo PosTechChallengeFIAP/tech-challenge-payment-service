@@ -3,10 +3,5 @@ provider "aws" {
 }
 
 terraform {
-  backend "s3" {
-    bucket = "tech-challenge-tf-state-bucket-m7ppr"
-    key    = "payment-service/terraform.tfstate"
-    region = "us-west-2"
-    encrypt = true
-  }
+  backend "s3" {}
 }

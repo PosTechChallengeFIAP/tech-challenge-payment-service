@@ -1,5 +1,5 @@
 resource "aws_db_instance" "postgres" {
-  identifier               = "tech-challenge-payment-service-pg"
+  identifier               = "tc-payment-service-pg"
   engine                   = "postgres"
   engine_version           = "16.4"
   instance_class           = "db.t3.micro"
@@ -17,6 +17,6 @@ resource "aws_db_instance" "postgres" {
   monitoring_interval      = 0
 
   tags = {
-    Name = "tech-challenge-payment-service-pg"
+    Name = "tc-payment-service-pg"
   }
 }

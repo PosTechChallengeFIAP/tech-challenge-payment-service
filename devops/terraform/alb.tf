@@ -1,19 +1,19 @@
 resource "aws_lb" "ecs_lb" {
-  name               = "tech-challenge-payment-service-lb"
+  name               = "tc-payment-service-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [data.terraform_remote_state.network.outputs.payment_api_sg_id]
-  subnets            = [data.terraform_remote_state.network.outputs.payment_api_public_subnet_a_id, data.terraform_remote_state.network.outputs.payment_api_public_subnet_b_id]
+  security_groups    = [data.terraform_remote_state.network.outputs.main_sg_id]
+  subnets            = [data.terraform_remote_state.network.outputs.main_public_subnet_a_id, data.terraform_remote_state.network.outputs.main_public_subnet_b_id]
 
   enable_deletion_protection = false
 
   tags = {
-    Name = "tech-challenge-payment-service-lb"
+    Name = "tc-payment-service-lb"
   }
 }
 
 resource "aws_lb_target_group" "ecs_target_group" {
-  name        = "tech-challenge-payment-service-tg"
+  name        = "tc-payment-service-tg"
   port        = 3000
   protocol    = "HTTP"
   target_type = "ip"
