@@ -37,7 +37,7 @@ resource "aws_ecs_task_definition" "app_task" {
   container_definitions = jsonencode([
     {
       name      = "tc-payment-service"
-      image     = "loadinggreg/tc-payment-service:${var.tc_image_tag}"
+      image     = "loadinggreg/tech-challenge-payment-service:${var.tc_image_tag}"
       cpu       = 256
       memory    = 512
       essential = true
