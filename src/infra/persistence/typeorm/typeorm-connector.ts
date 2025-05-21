@@ -24,6 +24,17 @@ export class TypeOrmConnector implements IDataBaseConnector{
   }
 
   public async connect(): Promise<boolean> {
+    Logger.info({
+      message: '[DATABASE] - Connecting',
+      additionalInfo: {
+        host: envPostgres.host,
+        port: envPostgres.port,
+        username: envPostgres.user,
+        password: envPostgres.pass,
+        database: envPostgres.database,
+        schema: envPostgres.schema,
+      }
+    });
     await this.typeOrmConnection.initialize()
         .then(async () => {
             Logger.info({

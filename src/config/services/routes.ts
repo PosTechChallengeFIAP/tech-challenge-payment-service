@@ -7,6 +7,7 @@ import { envApp } from '../variables/app'
 export async function setupRoutes(app: Express): Promise<void> {
   const router = Router()
   app.use(`/${envApp.name}`, router)
+  console.log(`[ROUTES] Routes main path: /${envApp.name}`)
 
   recursiveReaddir(join(__dirname, '/../../infra/http/routes'), async (_: any, files: any) => {
     for (const file of files) {

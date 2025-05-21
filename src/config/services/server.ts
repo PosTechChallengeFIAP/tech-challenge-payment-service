@@ -4,6 +4,7 @@ import { Logger } from '@infra/utils/logger/Logger'
 import { setupRoutes } from './routes'
 import { setupServerConfig } from './config'
 import { setupRequestHandlers } from './handlers'
+import { envApp } from '@config/variables/app'
 
 export class Server {
     private static instance: Server
@@ -27,7 +28,7 @@ export class Server {
             res.status(200).send('OK')
         })
 
-        app.listen(3000, () => {
+        app.listen(3000, envApp.host, () => {
             Logger.info({
                 message: '[APP] - app running on port: 3000'
             })
