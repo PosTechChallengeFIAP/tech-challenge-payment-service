@@ -1,0 +1,53 @@
+name: Terraform Deploy
+
+on:
+  workflow_run:
+    workflows: ["Docker Image CI/CD"]
+    types:
+      - completed
+
+jobs:
+  terraform:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Short Commit Hash
+        run: echo "TC_IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-west-2
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: ./devops/terraform
+        run: |
+          export TF_LOG=DEBUG
+          terraform init \
+            -backend-config="bucket=${{ vars.TF_MAIN_BUCKET_NAME }}" \
+            -backend-config="key=payment-service/terraform.tfstate" \
+            -backend-config="region=us-west-2" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Apply
+        working-directory: ./devops/terraform
+        run: |
+          terraform apply -auto-approve \
+            -var "db_password=${{ secrets.TF_POSTGRES_PASS }}" \
+            -var "db_username=${{ secrets.TF_POSTGRES_USER }}" \
+            -var "tc_image_tag=${{ env.TC_IMAGE_TAG }}" \
+            -var "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -var "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -var "aws_session_token=${{ secrets.AWS_SESSION_TOKEN }}" \
+            -var "aws_bucket_name=${{ vars.TF_MAIN_BUCKET_NAME }}" \
+
