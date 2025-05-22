@@ -115,7 +115,11 @@ resource "aws_ecs_task_definition" "app_task" {
         {
           name = "HOST"
           value = "0.0.0.0"
-        }
+        },
+        {
+          name  = "ORDER_QUEUE_URL"
+          value = data.terraform_remote_state.order-lambda.outputs.order_queue_url
+        },
       ]
     }
   ])
