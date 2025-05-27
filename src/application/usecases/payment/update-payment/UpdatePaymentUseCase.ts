@@ -3,6 +3,8 @@ import { inject, injectable } from "tsyringe";
 import { IUpdatePaymentUseCase } from "./IUpdatePaymentUseCase";
 import { TUpdatePaymentUseCaseRequest, TUpdatePaymentUseCaseResponse } from "./TUpdatePaymentUseCase";
 import { Payment } from "@domain/models/payment";
+import { EPaymentStatus } from "@domain/models/EPaymentStatus";
+import { ESQSMessageType, SQSHandler } from "@infra/aws/sqs/sendMessage";
 
 @injectable()
 export class UpdatePaymentUseCase implements IUpdatePaymentUseCase {
@@ -30,6 +32,21 @@ export class UpdatePaymentUseCase implements IUpdatePaymentUseCase {
         payment.setStatus(status);
 
         await this.paymentRepository.update(payment);
+
+        if(payment.status === EPaymentStatus.PAID) {
+            SQSHandler.sendMessage({
+                type: ESQSMessageType.ORDER_PAID,
+                data: payment
+            })
+        } else if(payment.status === EPaymentStatus.CANCELLED) {
+            SQSHandler.sendMessage({
+                type: ESQSMessageType.UPDATE_ORDER,
+                data: {
+                    orderId: payment.orderId,
+                    status: 'CANCELLED'
+                }
+            })
+        }
 
         return payment;
     }
